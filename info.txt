@@ -1,5 +1,4 @@
 Python 3.12.2
-Flask 3.0.3
 
 blinker           1.8.2
 cffi              1.17.0
@@ -20,14 +19,6 @@ typing_extensions 4.12.2
 Werkzeug          3.0.3
 
 
-User Regiseration Only by Admin
-Login
-Deposite cash to account
-Withdraw cash from account
-send cash to another account
-
-
-https://www.youtube.com/watch?v=iBgtRGWE3NM&list=PLU7aW4OZeUzwn6L1txXQ9viaAIR2mDqbv
 
 
 
