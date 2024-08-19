@@ -1,0 +1,36 @@
+Python 3.12.2
+Flask 3.0.3
+
+blinker           1.8.2
+cffi              1.17.0
+click             8.1.7
+colorama          0.4.6
+cryptography      43.0.0
+Flask             3.0.3
+Flask-MySQLdb     2.0.0
+Flask-WTF         1.2.1
+greenlet          3.0.3
+itsdangerous      2.2.0
+Jinja2            3.1.4
+MarkupSafe        2.1.5
+mysqlclient       2.2.4
+pip               24.2
+pycparser         2.22
+typing_extensions 4.12.2
+Werkzeug          3.0.3
+
+
+User Regiseration Only by Admin
+Login
+Deposite cash to account
+Withdraw cash from account
+send cash to another account
+
+
+https://www.youtube.com/watch?v=iBgtRGWE3NM&list=PLU7aW4OZeUzwn6L1txXQ9viaAIR2mDqbv
+
+
+
+
+
+

@@ -1,0 +1,197 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <style>
+        table td,th{
+            padding: 3px !important;
+            margin: 0 !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="">
+        <div class="container mt-4" >
+            <form action="#" id="transaction-form">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>Transfer</h4>
+                    </div>
+                    <div class="mb-3 col-md-3 col-sm-6 col-xs-12 row">
+                        <label for="account-in" class="col-sm-10 col-form-label">Account</label>
+                        <div class="col-sm-10">
+                            <select class="form-select" id="account-in" required aria-label=" -- Select Account -- ">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 col-md-3 col-sm-6 col-xs-12 row">
+                        <label for="balance-in" class="col-sm-10 col-form-label">Balance (&euro;)</label>
+                        <div class="col-sm-10">
+                            <input type="number" readonly id="balance-in" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-3 col-md-3 col-sm-6 col-xs-12 row">
+                        <label for="transaction-amount-in" class="col-sm-10 col-form-label">Transaction Amount </label>
+                        <div class="col-sm-10">
+                            <input type="number" id="transaction-amount-in" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3 col-md-3 col-sm-6 col-xs-12 row">
+                        <label for="receiving-account-in" class="col-sm-10 col-form-label">Receiving Account #</label>
+                        <div class="col-sm-10">
+                            <input type="number" id="receiving-account-in" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3 col-md-3 col-sm-6 col-xs-12 row">
+                        <label for="notes-in" class="col-sm-10 col-form-label">Notes</label>
+                        <div class="col-sm-10">
+                            <input type="text" id="notes-in" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mt-4 col-md-3 col-sm-6 col-xs-12 row">
+                        <br/><br/>
+                        <div class="col-sm-10">
+                            <input type="submit"  class=" mt-3 btn btn-primary form-control" value="Transfer">
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Tr-number</th>
+                                <th>Amount</th>
+                                <th>Sending Acc</th>
+                                <th>Receiving Acc</th>
+                                <th>Tr-time</th>
+                                <th>Note</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-tbl">
+
+                        </tbody>
+                        <caption>List of Users</caption>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block footscript %}
+    <script>
+        $(document).ready(function(){
+            $.ajax({
+                'url': "/load_users_accounts_tr_view",
+                'type': 'post',
+<!--                'data': {'user': user},-->
+                'dataType': 'JSON',
+                'success': function (data) {
+                    if (data) {
+                        var row = ""
+                        for (let i = 0; i < data.length; i++) {
+                            row += "<option value='" + data[i].account +  "'>" + data[i].account_number + " (" + data[i].type +  ")</option>";
+                        }
+                        $("#account-in").html(row);
+                        $("#account-in").trigger('change');
+                    }else{
+                        alert("Unable to load accounts")
+
+                    }
+
+                },
+                error: function () {
+
+                }
+            });
+
+            //show account balance when account selection changes
+            $("#account-in").on("change",function(){
+                show_account_balance($("#account-in").val());
+            });
+
+            $('#transaction-form').on('submit', function (e) {
+                    e.preventDefault();
+                    var s_account = $('#account-in').val()
+                    var r_account = $('#receiving-account-in').val()
+                    var tr_amount = $('#transaction-amount-in').val()
+                    var note = $('#notes-in').val()
+                    $.ajax({
+                        'url': "/execute_transaction",
+                        'type': 'POST',
+                        'data': { 's_account': s_account, 'r_account': r_account,
+                                  'tr_amount': tr_amount, 'note': note},
+                        'dataType': 'JSON',
+                        'headers': {
+                            "Accept": "application/json"
+                        },
+                        'success': function (data) {
+                            $('#transaction-form').trigger('reset');
+                            load_transactions();
+                        },
+                        error: function () {
+                            //alert("Somthing went wrong, unable to transfer");
+                        }
+                    });
+            });
+            load_transactions();
+        });
+
+        function show_account_balance(account){
+            $.ajax({
+                'url': "/load_accounts_balance",
+                'type': 'post',
+                'data': {'account': account},
+                'dataType': 'JSON',
+                'success': function (data) {
+                    if (data) {
+                        $("#balance-in").val(data.balance);
+                    }else{
+                        alert("Unable to load account balance")
+                    }
+
+                },
+                error: function () {
+                    alert("Something wenth wrong, Unable to load account balance")
+                }
+            });
+        }
+
+        function load_transactions(user = null){
+            $.ajax({
+                'url': "/load_transactions",
+                'type': 'post',
+                'data': {'user': user},
+                'dataType': 'JSON',
+                'success': function (data) {
+                    if (data) {
+                        for (let i = 0; i < data.length; i++) {
+                            var row = "<tr>"
+                            row += "<td>" + data[i].tr_number +  "</td>"
+                                 + "<td>&euro; " + data[i].tr_amount +  "</td>"
+                                 + "<td>" + data[i].sending_account +  "</td>"
+                                 + "<td>" + data[i].receiving_account +  "</td>"
+                                 + "<td>" + data[i].tr_time +  "</td>"
+                                 + "<td>" + data[i].note +  "</td>"
+                                 + "<td><button onclick = 'view_transaction(\""+data[i].transaction+"\")' type='button' class='btn btn-circle btn-primary'>Edit</button></td>"
+                            row += "</tr>";
+                            $("#transactions-tbl").append(row);
+                        }
+                    }else{
+                        alert("Unable to load account balance")
+                    }
+                },
+                error: function () {
+                    alert("Something wenth wrong, Unable to load account balance")
+                }
+            });
+        }
+    </script>
+
+{% endblock %}
+
